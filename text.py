@@ -106,7 +106,7 @@ class CharacterSet:
             #if True:
                 characters.append(character)
 
-        print "Total ", len(characters), " characters are found."
+        print ("Total ", len(characters), " characters are found.")
         return characters
 
     ''' getContours         '''
@@ -225,7 +225,7 @@ class CharacterSet:
             remove_counter = remove_counter+1
             result = self.NNTree.query(character.toArray(), k=k)  # we only want nearest neighbour, but the first result will be the point matching itself.
             nearestNeighbourDistance = result[0]
-            for i in xrange(1,k):
+            for i in range(1,k):
                 #print("[%s] nearestNeighbourDistance: %s"%(remove_counter,result[0]))
                 NNDistances.append(nearestNeighbourDistance[i])
         avgNNDistance = sum(NNDistances)/len(NNDistances)
@@ -287,9 +287,9 @@ class CharacterSet:
         dist_peaks = []
         n_copy = n.copy()
         n_copy[::-1].sort() # sort in reverse way
-        for i in xrange(num_bins):
+        for i in range(num_bins):
             _max_idx = numpy.where(n == n_copy[i])    # Find peak
-            for j in xrange(len(_max_idx[0])):
+            for j in range(len(_max_idx[0])):
                 dist_peaks.append(int(bins[_max_idx[0][j]]))
         print ("Distance peaks: %s" %dist_peaks)
         avgHorizontalNNDistance = sum(NNHorizontalDistances)/(len(NNHorizontalDistances))
@@ -303,9 +303,9 @@ class CharacterSet:
         dist_peaks = []
         n_copy = n.copy()
         n_copy[::-1].sort() # sort in reverse way
-        for i in xrange(num_bins):
+        for i in range(num_bins):
             _max_idx = numpy.where(n == n_copy[i])    # Find peak
-            for j in xrange(len(_max_idx[0])):
+            for j in range(len(_max_idx[0])):
                 dist_peaks.append(int(bins[_max_idx[0][j]]))
         print ("Distance peaks: %s" %dist_peaks)
         avgVerticalNNDistance = sum(NNVerticalDistances)/(len(NNVerticalDistances))

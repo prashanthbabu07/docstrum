@@ -4,8 +4,8 @@ import sys
 import os
 from page import Page
 
-SHOW_STEPS = True    # change this to false if you just want to see the final output for each page.
-SAVE_OUTPUT = False
+SHOW_STEPS = False    # change this to false if you just want to see the final output for each page.
+SAVE_OUTPUT = True
 
 inputFolder = os.path.join('images')
 outputFolder = os.path.join('output')

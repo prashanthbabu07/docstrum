@@ -14,10 +14,11 @@ import numpy
 import matplotlib.pyplot as plt
 import ntpath
 
-import itertools # For mostcommon
+import itertools  # For mostcommon
 import operator  # For mostcommon
 
 stopwatch = Stopwatch()
+
 
 class Page:
 
@@ -28,30 +29,31 @@ class Page:
         self.showSteps = showSteps
         self.saveDocstrum = saveDocstrum
         self.lines = []
-        greyscaleImage = cv2.imread(path, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+        greyscaleImage = cv2.imread(path, 0)  # cv2.CV_LOAD_IMAGE_GRAYSCALE)
         self.orientations = []
         self.dists = []
-        
+
         # PREPROCESSING START - NOISE REMOVAL
-        ## Blurring
+        # Blurring
         #greyscaleImage = cv2.medianBlur(greyscaleImage,3)
-        ## Closing
-        kernel = numpy.ones((5,5),numpy.uint8)
-        
-        ## Opening
+        # Closing
+        kernel = numpy.ones((5, 5), numpy.uint8)
+
+        # Opening
         #kernel = numpy.ones((5,5),numpy.uint8)
         #greyscaleImage = cv2.morphologyEx(greyscaleImage, cv2.MORPH_CLOSE, kernel)
         #greyscaleImage = cv2.morphologyEx(greyscaleImage, cv2.MORPH_CLOSE, kernel)
-        
+
         #greyscaleImage = cv2.morphologyEx(greyscaleImage, cv2.MORPH_OPEN, kernel)
         #greyscaleImage = cv2.morphologyEx(greyscaleImage, cv2.MORPH_CLOSE, kernel)
-        #self.display(greyscaleImage)
+        # self.display(greyscaleImage)
         # PREPROCESSING STOP
-        
-        colorImage = cv2.imread(path, cv2.CV_LOAD_IMAGE_COLOR)
 
-        if showSteps: self.display(greyscaleImage, title="Original Image")
-    
+        colorImage = cv2.imread(path)  # , cv2.CV_LOAD_IMAGE_COLOR)
+
+        if showSteps:
+            self.display(greyscaleImage, title="Original Image")
+
         #################################
         # VERTICAL LINE REMOVAL - START #
         #################################
@@ -112,14 +114,16 @@ class Page:
         ###############################
         # VERTICAL LINE REMOVAL - END #
         ###############################
-        
+
         #_,binaryImage = cv2.threshold(greyscaleImage, cv2.THRESH_OTSU, colors.greyscale.WHITE, cv2.THRESH_BINARY)
-        _, binaryImage = cv2.threshold(greyscaleImage,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        _, binaryImage = cv2.threshold(
+            greyscaleImage, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         binaryImage = cv2.bitwise_not(binaryImage)
-        if showSteps: self.display(binaryImage, title="Otsu-based Binarized Image") 
-          
+        if showSteps:
+            self.display(binaryImage, title="Otsu-based Binarized Image")
+
         self.characters = text.CharacterSet(binaryImage)
-        #self.display(binaryImage)
+        # self.display(binaryImage)
         stopwatch.lap("got characters")
         # words = [word, word, ..., word]
         # words = [append, count, extend, index, insert, pop, remove, reverse, sort]
@@ -128,39 +132,38 @@ class Page:
         # char = [nearestNeighbors, parentWord, x, y]
         self.words = self.characters.getWords()
         stopwatch.lap("got words & tuples")
-        
-        print "Total ", len(self.words), " words are found."
-        #for idx, word in enumerate(self.words):
+
+        print("Total ", len(self.words), " words are found.")
+        # for idx, word in enumerate(self.words):
         #    print "[",idx,"] word:"
         #    for idx_char, character in enumerate(word.characters):
         #        print "**[", idx_char, "] char info.. ", "(",character.x,",",character.y,")"
-        
-        #print "Tuple 1: (",self.words[1].angles[1], ", ", self.words[1].distances[1], ")"
-        
-        
+
+        # print "Tuple 1: (",self.words[1].angles[1], ", ", self.words[1].distances[1], ")"
+
         self.buildDocstrum(path)
         stopwatch.lap("built Docstrum")
         #theta = self.words[1].angles
         #r = self.words[1].distances
         #ax = plt.subplot(111,polar=True)
-        #ax.scatter(theta,r)
-        #plt.show()
-        
+        # ax.scatter(theta,r)
+        # plt.show()
+
         textlineImage = self.find_textline(colorImage)
         self.display(textlineImage, title="Found textlines")
-        
+
         self.image = colorImage
 
         stopwatch.lap("finished analysing page")
         stopwatch.endRun()
-        
-        #self.drawTextLine(self.words,colorImage)
-        #self.paint(self.image)
-        
-        #self.display_textline(textlineImage)
-        
-        #self.display(self.paint_textline(self.image))
-        print "Done."
+
+        # self.drawTextLine(self.words,colorImage)
+        # self.paint(self.image)
+
+        # self.display_textline(textlineImage)
+
+        # self.display(self.paint_textline(self.image))
+        print("Done.")
 
     def most_common(L):
         # get an iterable of (item, iterable) pairs
@@ -168,6 +171,7 @@ class Page:
         # print 'SL:', SL
         groups = itertools.groupby(SL, key=operator.itemgetter(0))
         # auxiliary function to get "quality" for an item
+
         def _auxfun(g):
             item, iterable = g
             count = 0
@@ -181,36 +185,39 @@ class Page:
         return max(groups, key=_auxfun)[0]
 
     def nnAngleHist(self, theta, path):
-        #print "theta from hist: ", theta
+        # print "theta from hist: ", theta
         num_bins = 180
-        n, bins, patches = plt.hist(theta, num_bins, facecolor='blue', alpha=0.5)
+        n, bins, patches = plt.hist(
+            theta, num_bins, facecolor='blue', alpha=0.5)
         if self.saveDocstrum:
-            plt.savefig(os.path.join(os.path.abspath("./docstrums"),"ds_nnAngle_" + ntpath.basename(path)))
+            plt.savefig(os.path.join(os.path.abspath("./docstrums"),
+                        "ds_nnAngle_" + ntpath.basename(path)))
         plt.show()
-        
-        
+
     def nnDistHist(self, dist, path):
-        num_bins = int(numpy.max(dist)-numpy.min(dist)+1)
+        num_bins = int(numpy.max(dist) - numpy.min(dist) + 1)
         #num_bins = 2*int(numpy.max(dist)+1)
         #print("num_bins: ",num_bins)
         #num_bins = 180
-        n, bins, patches = plt.hist(dist, num_bins, facecolor='orange', alpha=0.5)
+        n, bins, patches = plt.hist(
+            dist, num_bins, facecolor='orange', alpha=0.5)
         if self.saveDocstrum:
-            plt.savefig(os.path.join(os.path.abspath("./docstrums"),"ds_nnDist_" + ntpath.basename(path)))
+            plt.savefig(os.path.join(os.path.abspath("./docstrums"),
+                        "ds_nnDist_" + ntpath.basename(path)))
         plt.show()
-        
+
         dist_peaks = []
         n_copy = n.copy()
-        n_copy[::-1].sort() # sort in reverse way
+        n_copy[::-1].sort()  # sort in reverse way
         THRESHOLD_DIST_WIDTH = 15
-        for i in xrange(num_bins):
+        for i in range(num_bins):
             _max_idx = numpy.where(n == n_copy[i])    # Find peak
-            if len(_max_idx[0])>1:                    # If ties,
-                _max = _max_idx[0][int(len(_max_idx[0])/2)]  # get middle
+            if len(_max_idx[0]) > 1:                    # If ties,
+                _max = _max_idx[0][int(len(_max_idx[0]) / 2)]  # get middle
             else:
                 _max = _max_idx[0][0]
-            dist_peaks.append(int(_max+numpy.min(dist)))
-        print ("Distance peaks: %s" %dist_peaks)
+            dist_peaks.append(int(_max + numpy.min(dist)))
+        print("Distance peaks: %s" % dist_peaks)
         '''
         first_group_offset = -1
         second_group_offset = -1
@@ -250,7 +257,7 @@ class Page:
         print ("second group: %s and avg: %d" %(dist_peaks[first_group_offset:second_group_offset],numpy.mean(dist_peaks[first_group_offset:second_group_offset])))
 
         '''
-    
+
     def buildDocstrum(self, path):
         theta = []
         theta_hist = []
@@ -259,67 +266,80 @@ class Page:
         sz = 1
         for word in self.words:
             for angle in word.angles:
-                #theta.append(numpy.pi+angle) # The second quadrant
-                #print "word.angle = <<", angle, ">>"
-                theta.append(1/2*numpy.pi-angle) # -pi/2 < x < pi/2 (1 and 4 quadrant)
-                theta.append(3/2*numpy.pi-angle) # pi/2 < x < -pi/2 (2 and 3 quadrant)
-                theta_hist.append(math.degrees(1/2*numpy.pi-angle))
+                # theta.append(numpy.pi+angle) # The second quadrant
+                # print "word.angle = <<", angle, ">>"
+                # -pi/2 < x < pi/2 (1 and 4 quadrant)
+                theta.append(1 / 2 * numpy.pi - angle)
+                # pi/2 < x < -pi/2 (2 and 3 quadrant)
+                theta.append(3 / 2 * numpy.pi - angle)
+                theta_hist.append(math.degrees(1 / 2 * numpy.pi - angle))
             for distance in word.distances:
                 r.append(distance)
                 r.append(distance)
                 dist_hist.append(distance)
-        ax = plt.subplot(111,polar=True)
+        ax = plt.subplot(111, polar=True)
         #print("The peak of text-line orientation: ",self.most_common(theta_hist))
         #print("shape of dist_hist: ",numpy.shape(dist_hist))
         #print("The peak of within-line distance: ",self.most_common(dist_hist))
         self.orientations = theta_hist
         self.dists = dist_hist
-        ax.scatter(theta,r,sz)
+        ax.scatter(theta, r, sz)
         if self.saveDocstrum:
-            plt.savefig(os.path.join(os.path.abspath("./docstrums"),"ds_" + ntpath.basename(path)))
+            plt.savefig(os.path.join(os.path.abspath(
+                "./docstrums"), "ds_" + ntpath.basename(path)))
         if self.showSteps:
             plt.show()
-            self.nnAngleHist(theta_hist,path)
-            #self.nnDistHist(dist_hist,path)
-    
+            self.nnAngleHist(theta_hist, path)
+            # self.nnDistHist(dist_hist,path)
+
     ''' paint '''
     ''' color words '''
+
     def paint(self, image):
 
-        #print len(self.words)
+        # print len(self.words)
         for word in self.words:
+            # try:
             image = word.paint(image, colors.RED)
+            # except:
+            #     # print(ex)
+            #     pass
 
         return image
-    
-    def find_textline(self,image):
+
+    def find_textline(self, image):
         image = image.copy()
-        ratio = 4.0/8.0
+        ratio = 4.0 / 8.0
         #ratio = 4.0/4.0
         for word in self.words:
-            #dir(word)
-            #word.angles
+            # dir(word)
+            # word.angles
             points = []
             multiplier = 1
             for character in word.characters:
-                #print "(",character.x,", ",character.y,")"
-                #print "nn: ", character.nearestNeighbors
+                # print "(",character.x,", ",character.y,")"
+                # print "nn: ", character.nearestNeighbors
                 points.append([character.x, character.y])
             points.sort(key=lambda x: x[0])
-            #print("points:",points)
-            w = max(points,key=lambda x: x[0])[0]-min(points,key=lambda x: x[0])[0]
-            #print("w:",w)
-            h = max(points,key=lambda x: x[1])[1]-min(points,key=lambda x: x[1])[1]
-            #print(h)
-            dx, dy, x0, y0 = cv2.fitLine(numpy.array(points), cv2.cv.CV_DIST_L2, 0, 0.01, 0.01)
+            # print("points:",points)
+            w = max(points, key=lambda x: x[0])[
+                0] - min(points, key=lambda x: x[0])[0]
+            # print("w:",w)
+            h = max(points, key=lambda x: x[1])[
+                1] - min(points, key=lambda x: x[1])[1]
+            # print(h)
+            dx, dy, x0, y0 = cv2.fitLine(numpy.array(
+                points), cv2.DIST_L2, 0, 0.01, 0.01)
             #print("dx:",dx,", dy:",dy,", x0:",x0,", y0:",y0)
             #start = (int(x0 - dx*w*ratio), int(y0 - dy*w*ratio))
-            start = (int(min(points,key=lambda x: x[0])[0]),int((dy/dx)*(min(points,key=lambda x: x[0])[0]-x0)+y0))
+            start = (int(min(points, key=lambda x: x[0])[0]), int(
+                (dy / dx) * (min(points, key=lambda x: x[0])[0] - x0) + y0))
             #end = (int(x0 + dx*w*ratio), int(y0 + dy*w*ratio))
-            end = (int(max(points,key=lambda x: x[0])[0]),int((dy/dx)*(max(points,key=lambda x: x[0])[0]-x0)+y0))
-            #print(start,end)
-            self.lines.append(g.Line([start,end]))
-            cv2.line(image, start, end, (0,255,255),2)
+            end = (int(max(points, key=lambda x: x[0])[0]), int(
+                (dy / dx) * (max(points, key=lambda x: x[0])[0] - x0) + y0))
+            # print(start,end)
+            self.lines.append(g.Line([start, end]))
+            cv2.line(image, start, end, (0, 255, 255), 2)
         return image
 
     def save(self, path):
@@ -328,8 +348,8 @@ class Page:
         image = self.paint(image)
         #image = self.paint_textline(image)
         cv2.imwrite(path, image)
-        
-    def display(self, image, boundingBox=(800,800), title='Image'):
+
+    def display(self, image, boundingBox=(800, 800), title='Image'):
 
         stopwatch.pause()
 
@@ -339,17 +359,17 @@ class Page:
             displayDimension.fitInside(maxDimension)
             image = cv2.resize(image, tuple(displayDimension))
 
-        cv2.namedWindow(title, cv2.CV_WINDOW_AUTOSIZE)
+        cv2.namedWindow(title, cv2.WINDOW_AUTOSIZE)
         cv2.imshow(title, image)
         cv2.waitKey()
 
         stopwatch.unpause()
 
-    def show(self, boundingBox=None, title="Image"):    #textImage
+    def show(self, boundingBox=None, title="Image"):  # textImage
 
         #image = numpy.zeros(self.image.shape, numpy.uint8)
         image = self.image.copy()
-        
+
         image = self.paint(image)
 
         self.display(image, boundingBox, title)

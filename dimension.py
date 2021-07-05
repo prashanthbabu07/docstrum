@@ -26,7 +26,7 @@ class Dimension():
                 self.index = 0
             def __iter__(self):
                 return self
-            def next(self):
+            def __next__(self):
                 if self.index >= len(self.source):
                     raise StopIteration
                 else:

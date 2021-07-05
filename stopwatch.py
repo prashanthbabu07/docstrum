@@ -26,7 +26,7 @@ class Stopwatch:
         currentTime = time.time()
         lapTime = currentTime - self.lastLapTime - self.pauseDuration
 
-        print "%.2f\t%.2f\t%s" %(self.__getTotalRunTime(), lapTime, message)
+        print ("%.2f\t%.2f\t%s" %(self.__getTotalRunTime(), lapTime, message))
         self.lastLapTime = currentTime
         self.pauseStartTime = None
         self.pauseDuration = 0
@@ -48,7 +48,7 @@ class Stopwatch:
 
         self.runTimes.append(self.__getTotalRunTime())
         average = sum(self.runTimes) / (len(self.runTimes))
-        print "average time: %.2f" %average
+        print ("average time: %.2f" %average)
         print
 
         self.pauseStartTime = None

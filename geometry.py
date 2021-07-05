@@ -4,15 +4,16 @@ import math
 
 import colors
 
+
 class Angle:
 
     def __init__(self, guess=None, degrees=None, radians=None, gradient=None):
 
-        self.canonical = None # radians is the 'canonical' representation.
+        self.canonical = None  # radians is the 'canonical' representation.
 
         if guess is not None:
             try:
-                #try treating it like an Angle object
+                # try treating it like an Angle object
                 self.radians(guess.radians())
             except:
                 # otherwise treat it like a number in degrees
@@ -63,12 +64,12 @@ class Angle:
         rads = float(rads)
 
         # put it into the range -pi < x < pi, including accounting for wrap-around
-        rads = ((rads + math.pi) % (2*math.pi)) - math.pi
+        rads = ((rads + math.pi) % (2 * math.pi)) - math.pi
 
         # Our angles are symmetric. 3*pi/4 is equivalent to -pi/4
-        if rads > (math.pi/2):
+        if rads > (math.pi / 2):
             rads = rads - math.pi
-        elif rads < (-math.pi/2):
+        elif rads < (-math.pi / 2):
             rads = rads + math.pi
 
         return rads
@@ -85,6 +86,7 @@ class Angle:
         rawAverage = sumOfRads / len(angles)
         return Angle(radians=Angle.sanitize(rawAverage))
 
+
 class PointArray:
 
     def __init__(self, points=[]):
@@ -98,7 +100,7 @@ class PointArray:
         # human-readable output
         strings = [point.__str__() for point in self.points]
 
-        return "[%s]" %(", ".join(strings))
+        return "[%s]" % (", ".join(strings))
 
     def __repr__(self):
         # machine-readable output
@@ -108,7 +110,7 @@ class PointArray:
         self.points.append(Point(point))
 
     def numpyArray(self):
-        return numpy.array([ [list(point.align())] for point in self.points ])
+        return numpy.array([[list(point.align())] for point in self.points])
 
     def __getitem__(self, key):
         return self.points.__getitem__(key)
@@ -129,7 +131,7 @@ class PointArray:
         return self.points.__iter__()
 
     def paint(self, image, color):
-        for point in  self.points:
+        for point in self.points:
             image = point.paint(image, color)
         return image
 
@@ -163,14 +165,16 @@ class Point:
 
         angle = Angle(angle)
         rotatedPoint = Point()
-        rotatedPoint.x = self.x*math.cos(-angle.radians()) - self.y*math.sin(-angle.radians())
-        rotatedPoint.y = self.x*math.sin(-angle.radians()) + self.y*math.cos(-angle.radians())
+        rotatedPoint.x = self.x * \
+            math.cos(-angle.radians()) - self.y * math.sin(-angle.radians())
+        rotatedPoint.y = self.x * \
+            math.sin(-angle.radians()) + self.y * math.cos(-angle.radians())
 
         return rotatedPoint
 
     def __str__(self):
         # human-readable output
-        return "(x:%s, y:%s)" %(self.x, self.y)
+        return "(x:%s, y:%s)" % (self.x, self.y)
 
     def __repr__(self):
         # machine-readable output
@@ -201,7 +205,7 @@ class Point:
 
         yield self.x
         yield self.y
-        raise StopIteration
+        # raise StopIteration
 
     def __add__(self, other):
         result = Point()
@@ -216,7 +220,7 @@ class Point:
         return result
 
     def paint(self, image, color, diameter=3):
-        cv2.circle(image, self.cv2point(), diameter, color, 1, cv2.CV_AA)
+        cv2.circle(image, self.cv2point(), diameter, color, 1, cv2.LINE_AA)
         return image
 
     @staticmethod
@@ -271,9 +275,11 @@ class Line:
     def intersect(self, other):
 
         if (self.start is None) or (self.end is None):
-            raise Exception('The PixelLine is underspecified; it requires at least two points')
+            raise Exception(
+                'The PixelLine is underspecified; it requires at least two points')
         if (other.start is None) or (other.end is None):
-            raise Exception('The PixelLine is underspecified; it requires at least two points')
+            raise Exception(
+                'The PixelLine is underspecified; it requires at least two points')
 
         otherX = float(other.start.x)
         otherY = float(other.start.y)
@@ -284,8 +290,9 @@ class Line:
         selfM = float(self.angle.gradient())
 
         point = Point()
-        point.x = (otherY - selfY + selfM*selfX - otherM*otherX) / (selfM - otherM)
-        point.y = selfY + selfM*(point.x - selfX)
+        point.x = (otherY - selfY + selfM * selfX -
+                   otherM * otherX) / (selfM - otherM)
+        point.y = selfY + selfM * (point.x - selfX)
 
         return point
 
@@ -334,10 +341,12 @@ class Line:
         # try to fit a least-squares trend line
 
         multiplier = 2000
-        dx, dy, x0, y0 = cv2.fitLine(self.points.numpyArray(), cv2.cv.CV_DIST_L2, 0, 0.01, 0.01)
+        dx, dy, x0, y0 = cv2.fitLine(
+            self.points.numpyArray(), cv2.cv.CV_DIST_L2, 0, 0.01, 0.01)
 
-        self.start = Point(int(x0 - dx*multiplier), int(y0 - dy*multiplier))
-        self.end = Point(int(x0 + dx*multiplier), int(y0 + dy*multiplier))
+        self.start = Point(int(x0 - dx * multiplier),
+                           int(y0 - dy * multiplier))
+        self.end = Point(int(x0 + dx * multiplier), int(y0 + dy * multiplier))
         self.angle = self.calculateAngle(self.start, self.end)
 
     def calculateAngle(self, start, end):
@@ -356,15 +365,10 @@ class Line:
     def paint(self, image, color=colors.BLUE):
 
         if (self.start is None) or (self.end is None):
-            raise Exception('The Line is underspecified; it requires at least two points')
+            raise Exception(
+                'The Line is underspecified; it requires at least two points')
         else:
-            cv2.line(image, self.start.cv2point(), self.end.cv2point(), color, 1, cv2.CV_AA)
+            cv2.line(image, self.start.cv2point(),
+                     self.end.cv2point(), color, 1, cv2.LINE_AA)
 
         return image
-
-
-
-
-
-
-

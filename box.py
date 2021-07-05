@@ -55,7 +55,8 @@ class Box:
 
     def rectToPoints(self, rect):
 
-        points = cv2.cv.BoxPoints(rect)             # Find four vertices of rectangle from above rect
+        points = cv2.boxPoints(rect)             # Find four vertices of rectangle from above rect
+        # cv2.bo
         points = numpy.int0(numpy.around(points))   # Round the values and make them integers
         return points
 

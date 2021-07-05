@@ -37,7 +37,7 @@ class cycle:
         self.colors = colors
         self.index = 0        # this will continually loop through self.colors
 
-    def next(self):
+    def __next__(self):
         color = self.colors[self.index]
         self.index = (self.index+1) % len(self.colors)
         return color
@@ -51,7 +51,7 @@ class cycle:
                 self.iterCounter = 0  # this will continually count upwards (it won't loop around)
             def __iter__(self):
                 return self
-            def next(self):
+            def __next__(self):
                 if self.limit != None and self.limit > self.iterCounter:
                     raise StopIteration
                 else:
